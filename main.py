@@ -25,7 +25,24 @@ class StartShiftRequest(BaseModel):
 class ShiftNoteRequest(BaseModel):
     text: str
 
+class EndShiftRequest(BaseModel):
+    end_latitude: float
+    end_longitude: float
+
+
 # --------- ROUTES ---------
+
+@app.post("/shifts/{shift_id}/end")
+def end_shift(shift_id: int, data: EndShiftRequest):
+    for shift in fake_db["shifts"]:
+        if shift["id"] == shift_id:
+            shift["end_time"] = datetime.utcnow().isoformat()
+            shift["end_latitude"] = data.end_latitude
+            shift["end_longitude"] = data.end_longitude
+            shift["status"] = "completed"
+            return shift
+    return {"error": "Shift not found"}
+
 
 @app.get("/")
 def root():
