@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Request
 from pydantic import BaseModel
 from datetime import datetime
 import os
+import glob
 from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(title="FieldLog API")
@@ -108,6 +109,18 @@ async def upload_photo(shift_id: int, request: Request, file: UploadFile = File(
             return photo
 
     return {"error": "Shift not found"}
+
+@app.post("/admin/reset")
+def reset_dashboard():
+    fake_db["shifts"].clear()
+
+    for file_path in glob.glob(f"{UPLOAD_DIR}/*"):
+        try:
+            os.remove(file_path)
+        except OSError:
+            pass
+
+    return {"message": "Dashboard and uploaded photos cleared"}
 
 # Owner Dashboard
 @app.get("/owner/dashboard")
