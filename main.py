@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Request
 from pydantic import BaseModel
 from datetime import datetime
 import os
@@ -22,7 +22,6 @@ class StartShiftRequest(BaseModel):
     username: str
     assignment_name: str
     start_latitude: float
-    start_longitude: float
     start_longitude: float
 
 class ShiftNoteRequest(BaseModel):
@@ -87,7 +86,7 @@ def add_note(shift_id: int, data: ShiftNoteRequest):
     return {"error": "Shift not found"}
 
 @app.post("/shifts/{shift_id}/photos")
-async def upload_photo(shift_id: int, file: UploadFile = File(...)):
+async def upload_photo(shift_id: int, request: Request, file: UploadFile = File(...)):
     for shift in fake_db["shifts"]:
         if shift["id"] == shift_id:
             file_location = f"{UPLOAD_DIR}/shift_{shift_id}_{file.filename}"
@@ -96,9 +95,11 @@ async def upload_photo(shift_id: int, file: UploadFile = File(...)):
                 content = await file.read()
                 f.write(content)
 
+            base_url = str(request.base_url).rstrip("/")
+
             photo = {
                 "file_path": file_location,
-                "url": f"http://192.168.1.70:8000/{file_location}",
+                "url": f"{base_url}/{file_location}",
                 "filename": file.filename,
                 "uploaded_at": datetime.utcnow().isoformat()
             }
