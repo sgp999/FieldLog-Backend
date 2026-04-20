@@ -19,7 +19,10 @@ app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 # --------- MODELS ---------
 
 class StartShiftRequest(BaseModel):
+    username: str
+    assignment_name: str
     start_latitude: float
+    start_longitude: float
     start_longitude: float
 
 class ShiftNoteRequest(BaseModel):
@@ -53,7 +56,8 @@ def root():
 def start_shift(data: StartShiftRequest):
     shift = {
         "id": len(fake_db["shifts"]) + 1,
-        "assignment_name": f"Shift {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        "username": data.username,
+        "assignment_name": data.assignment_name,
         "start_time": datetime.utcnow().isoformat(),
         "start_latitude": data.start_latitude,
         "start_longitude": data.start_longitude,
