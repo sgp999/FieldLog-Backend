@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Request
 from pydantic import BaseModel
 from datetime import datetime
 import os
+import uuid
 import glob
 from fastapi.staticfiles import StaticFiles
 
@@ -90,7 +91,8 @@ def add_note(shift_id: int, data: ShiftNoteRequest):
 async def upload_photo(shift_id: int, request: Request, file: UploadFile = File(...)):
     for shift in fake_db["shifts"]:
         if shift["id"] == shift_id:
-            file_location = f"{UPLOAD_DIR}/shift_{shift_id}_{file.filename}"
+            unique_name = f"shift_{shift_id}_{uuid.uuid4().hex}_{file.filename}"
+            file_location = f"{UPLOAD_DIR}/{unique_name}"
 
             with open(file_location, "wb") as f:
                 content = await file.read()
